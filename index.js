@@ -332,9 +332,10 @@ const draggie = new Sprite({
   image: draggieImage,
   frames: {
     max: 4,
-    hold: 30,
+    hold: 50,
   },
   animate: true,
+  isEnemy: true,
 });
 const embyImage = new Image();
 embyImage.src = "./img/embySprite.png";
@@ -357,6 +358,22 @@ function animateBattle() {
   draggie.draw();
   emby.draw();
 }
+
+//animate()
+animateBattle();
+
+document.querySelectorAll("button").forEach((button) => {
+  button.addEventListener("click", () => {
+    emby.attack({
+      attack: {
+        name: "Tackle",
+        damage: 10,
+        type: "Normal",
+      },
+      recipient: draggie,
+    });
+  });
+});
 
 let lastKey = "";
 window.addEventListener("keydown", (event) => {
