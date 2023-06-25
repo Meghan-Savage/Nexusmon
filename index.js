@@ -76,6 +76,7 @@ const player = new Sprite({
   image: playerDownImage,
   frames: {
     max: 4,
+    hold: 20,
   },
   sprites: {
     up: playerUpImage,
@@ -130,7 +131,7 @@ const battle = {
 };
 
 function animate() {
-  window.requestAnimationFrame(animate);
+  const animationId = window.requestAnimationFrame(animate);
   background.draw();
   boundries.forEach((boundry) => {
     boundry.draw();
@@ -142,10 +143,12 @@ function animate() {
   foreground.draw();
 
   let moving = true;
-  player.moving = false;
+  player.animate = false;
 
   if (battle.initiated) return;
+
   //activate a battle
+
   if (keys.w.pressed || keys.a.pressed || keys.s.pressed || keys.d.pressed) {
     for (let i = 0; i < battleZones.length; i++) {
       const battleZone = battleZones[i];
@@ -170,14 +173,37 @@ function animate() {
         Math.random() < 0.01
       ) {
         console.log("activate battle");
+
+        //stop current animation loop
+        window.cancelAnimationFrame(animationId);
         battle.initiated = true;
+        gsap.to("#overlappingDiv", {
+          opacity: 1,
+          repeat: 3,
+          yoyo: true,
+          duration: 0.4,
+          onComplete() {
+            gsap.to("#overlappingDiv", {
+              opacity: 1,
+              duration: 0.4,
+              onComplete() {
+                //activate new animation loop
+                animateBattle();
+                gsap.to("#overlappingDiv", {
+                  opacity: 0,
+                  duration: 0.4,
+                });
+              },
+            });
+          },
+        });
         break;
       }
     }
   }
 
   if (keys.w.pressed && lastKey === "w") {
-    player.moving = true;
+    player.animate = true;
     player.image = player.sprites.up;
 
     for (let i = 0; i < boundries.length; i++) {
@@ -204,7 +230,7 @@ function animate() {
         moveable.position.y += 2;
       });
   } else if (keys.a.pressed && lastKey === "a") {
-    player.moving = true;
+    player.animate = true;
     player.image = player.sprites.left;
     for (let i = 0; i < boundries.length; i++) {
       const boundry = boundries[i];
@@ -230,7 +256,7 @@ function animate() {
         moveable.position.x += 3;
       });
   } else if (keys.s.pressed && lastKey === "s") {
-    player.moving = true;
+    player.animate = true;
     player.image = player.sprites.down;
     for (let i = 0; i < boundries.length; i++) {
       const boundry = boundries[i];
@@ -256,7 +282,7 @@ function animate() {
         moveable.position.y -= 2;
       });
   } else if (keys.d.pressed && lastKey === "d") {
-    player.moving = true;
+    player.animate = true;
     player.image = player.sprites.right;
     for (let i = 0; i < boundries.length; i++) {
       const boundry = boundries[i];
@@ -285,6 +311,53 @@ function animate() {
 }
 
 animate();
+
+const battleBackgroundImage = new Image();
+battleBackgroundImage.src = "./img/battleBackground.png";
+const battleBackground = new Sprite({
+  position: {
+    x: 0,
+    y: 0,
+  },
+  image: battleBackgroundImage,
+});
+
+const draggieImage = new Image();
+draggieImage.src = "./img/draggieSprite.png";
+const draggie = new Sprite({
+  position: {
+    x: 800,
+    y: 100,
+  },
+  image: draggieImage,
+  frames: {
+    max: 4,
+    hold: 30,
+  },
+  animate: true,
+});
+const embyImage = new Image();
+embyImage.src = "./img/embySprite.png";
+const emby = new Sprite({
+  position: {
+    x: 280,
+    y: 325,
+  },
+  image: embyImage,
+  frames: {
+    max: 4,
+    hold: 30,
+  },
+  animate: true,
+});
+
+function animateBattle() {
+  window.requestAnimationFrame(animateBattle);
+  battleBackground.draw();
+  draggie.draw();
+  emby.draw();
+}
+
 let lastKey = "";
 window.addEventListener("keydown", (event) => {
   switch (event.key) {
