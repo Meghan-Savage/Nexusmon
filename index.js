@@ -312,69 +312,6 @@ function animate() {
 
 animate();
 
-const battleBackgroundImage = new Image();
-battleBackgroundImage.src = "./img/battleBackground.png";
-const battleBackground = new Sprite({
-  position: {
-    x: 0,
-    y: 0,
-  },
-  image: battleBackgroundImage,
-});
-
-const draggieImage = new Image();
-draggieImage.src = "./img/draggieSprite.png";
-const draggie = new Sprite({
-  position: {
-    x: 800,
-    y: 100,
-  },
-  image: draggieImage,
-  frames: {
-    max: 4,
-    hold: 50,
-  },
-  animate: true,
-  isEnemy: true,
-});
-const embyImage = new Image();
-embyImage.src = "./img/embySprite.png";
-const emby = new Sprite({
-  position: {
-    x: 280,
-    y: 325,
-  },
-  image: embyImage,
-  frames: {
-    max: 4,
-    hold: 30,
-  },
-  animate: true,
-});
-
-function animateBattle() {
-  window.requestAnimationFrame(animateBattle);
-  battleBackground.draw();
-  draggie.draw();
-  emby.draw();
-}
-
-//animate()
-animateBattle();
-
-document.querySelectorAll("button").forEach((button) => {
-  button.addEventListener("click", () => {
-    emby.attack({
-      attack: {
-        name: "Tackle",
-        damage: 10,
-        type: "Normal",
-      },
-      recipient: draggie,
-    });
-  });
-});
-
 let lastKey = "";
 window.addEventListener("keydown", (event) => {
   switch (event.key) {
