@@ -1,8 +1,4 @@
-const embyImage = new Image();
-embyImage.src = "./img/embySprite.png";
 
-const draggieImage = new Image();
-draggieImage.src = "./img/draggieSprite.png";
 
 const monsters = {
   Emby: {
@@ -10,7 +6,9 @@ const monsters = {
       x: 280,
       y: 325,
     },
-    image: embyImage,
+    image: {
+      src: "./img/embySprite.png",
+    },
     frames: {
       max: 4,
       hold: 30,
@@ -25,7 +23,9 @@ const monsters = {
       x: 800,
       y: 100,
     },
-    image: draggieImage,
+    image: {
+      src: "./img/draggieSprite.png",
+    },
     frames: {
       max: 4,
       hold: 50,
@@ -33,6 +33,23 @@ const monsters = {
     animate: true,
     isEnemy: true,
     name: "Draggie",
-    attacks: [attacks.Tackle],
+    attacks: [attacks.Tackle, attacks.Fireball],
+  },
+  Tenty: {
+    position: {
+      x: 800,
+      y: 100,
+    },
+    image: {
+      src: "./img/tentySprite.png",
+    },
+    frames: {
+      max: 4,
+      hold: 50,
+    },
+    animate: true,
+    isEnemy: true,
+    name: "Tenty",
+    attacks: [attacks.Tackle, attacks.Fireball],
   },
 };

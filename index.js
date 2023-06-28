@@ -172,10 +172,13 @@ function animate() {
         overlappingArea > (player.width * player.height) / 2 &&
         Math.random() < 0.01
       ) {
-        console.log("activate battle");
-
         //stop current animation loop
         window.cancelAnimationFrame(animationId);
+
+        audio.Map.stop();
+        audio.initBattle.play();
+        audio.battle.play();
+
         battle.initiated = true;
         gsap.to("#overlappingDiv", {
           opacity: 1,
@@ -188,6 +191,7 @@ function animate() {
               duration: 0.4,
               onComplete() {
                 //activate new animation loop
+                initBattle();
                 animateBattle();
                 gsap.to("#overlappingDiv", {
                   opacity: 0,
@@ -253,7 +257,7 @@ function animate() {
 
     if (moving)
       moveables.forEach((moveable) => {
-        moveable.position.x += 3;
+        moveable.position.x += 2;
       });
   } else if (keys.s.pressed && lastKey === "s") {
     player.animate = true;
@@ -348,5 +352,13 @@ window.addEventListener("keyup", (event) => {
     case "d":
       keys.d.pressed = false;
       break;
+  }
+});
+
+let clicked = false;
+addEventListener("click", () => {
+  if (!clicked) {
+    audio.Map.play();
+    clicked = true;
   }
 });

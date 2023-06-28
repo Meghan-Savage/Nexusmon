@@ -8,17 +8,111 @@ const battleBackground = new Sprite({
   image: battleBackgroundImage,
 });
 
-const draggie = new Sprite(monsters.Draggie);
-const emby = new Sprite(monsters.Emby);
+let draggie;
+let emby;
+let tenty;
+let renderedSprites;
+let battleAnimationId;
+let queue;
 
-const renderedSprites = [draggie, emby];
-const button = document.createElement("button");
-button.innerHTML = "Fireball";
+function initBattle() {
+  document.querySelector("#userInterface").style.display = "block";
+  document.querySelector("#dialogueBox").style.display = "none";
+  document.querySelector("#enemyHealthBar").style.width = "100%";
+  document.querySelector("#playerHealthBar").style.width = "100%";
+  document.querySelector("#attacksBox").replaceChildren();
 
-document.querySelector("#attacksBox").append(button);
+  draggie = new Monster(monsters.Draggie);
+  emby = new Monster(monsters.Emby);
+  tenty = new Monster(monsters.Tenty);
+  renderedSprites = [draggie, emby];
+  queue = [];
 
+  emby.attacks.forEach((attack) => {
+    const button = document.createElement("button");
+    button.innerHTML = attack.name;
+    document.querySelector("#attacksBox").append(button);
+  });
+
+  // our event listeners for our buttons (attack)
+  document.querySelectorAll("button").forEach((button) => {
+    button.addEventListener("click", (e) => {
+      const selectedAttack = attacks[e.currentTarget.innerHTML];
+      emby.attack({
+        attack: selectedAttack,
+        recipient: draggie,
+        renderedSprites,
+      });
+
+      if (draggie.health <= 0) {
+        queue.push(() => {
+          draggie.faint();
+        });
+        queue.push(() => {
+          // fade back to black
+          gsap.to("#overlappingDiv", {
+            opacity: 1,
+            onComplete: () => {
+              cancelAnimationFrame(battleAnimationId);
+              animate();
+              document.querySelector("#userInterface").style.display = "none";
+
+              gsap.to("#overlappingDiv", {
+                opacity: 0,
+              });
+
+              battle.initiated = false;
+              audio.Map.play();
+            },
+          });
+        });
+      }
+      //enemy attack
+      const randomAttack =
+        draggie.attacks[Math.floor(Math.random() * draggie.attacks.length)];
+
+      queue.push(() => {
+        draggie.attack({
+          attack: randomAttack,
+          recipient: emby,
+          renderedSprites,
+        });
+
+        if (emby.health <= 0) {
+          queue.push(() => {
+            emby.faint();
+          });
+
+          queue.push(() => {
+            // fade back to black
+            gsap.to("#overlappingDiv", {
+              opacity: 1,
+              onComplete: () => {
+                cancelAnimationFrame(battleAnimationId);
+                animate();
+                document.querySelector("#userInterface").style.display = "none";
+
+                gsap.to("#overlappingDiv", {
+                  opacity: 0,
+                });
+
+                battle.initiated = false;
+                audio.Map.play();
+              },
+            });
+          });
+        }
+      });
+    });
+    button.addEventListener("mouseenter", (e) => {
+      const selectedAttack = attacks[e.currentTarget.innerHTML];
+      document.querySelector("#attackType").innerHTML = selectedAttack.type;
+      document.querySelector("#attackType").style.color = selectedAttack.color;
+    });
+  });
+}
 function animateBattle() {
-  window.requestAnimationFrame(animateBattle);
+  battleAnimationId = window.requestAnimationFrame(animateBattle);
   battleBackground.draw();
 
   renderedSprites.forEach((sprite) => {
@@ -26,36 +120,11 @@ function animateBattle() {
   });
 }
 
-//animate()
-animateBattle();
-
-const queue = [];
+animate();
+// initBattle();
+// animateBattle();
 
 //attack buttons
-document.querySelectorAll("button").forEach((button) => {
-  button.addEventListener("click", (e) => {
-    const selectedAttack = attacks[e.currentTarget.innerHTML];
-    emby.attack({
-      attack: selectedAttack,
-      recipient: draggie,
-      renderedSprites,
-    });
-    queue.push(() => {
-      draggie.attack({
-        attack: attacks.Tackle,
-        recipient: emby,
-        renderedSprites,
-      });
-    });
-    // queue.push(() => {
-    //   draggie.attack({
-    //     attack: attacks.Fireball,
-    //     recipient: emby,
-    //     renderedSprites,
-    //   });
-    // });
-  });
-});
 
 document.querySelector("#dialogueBox").addEventListener("click", (e) => {
   if (queue.length > 0) {
