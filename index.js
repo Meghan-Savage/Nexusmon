@@ -65,7 +65,7 @@ charactersMap.forEach((row, i) => {
   row.forEach((symbol, j) => {
     if (symbol === 1026) {
       characters.push(
-        new Sprite({
+        new Character({
           position: {
             x: j * Boundry.width + offset.x,
             y: i * Boundry.height + offset.y,
@@ -77,11 +77,16 @@ charactersMap.forEach((row, i) => {
           },
           scale: 3,
           animate: false,
+          dialogue: [
+            "Back in my time, dreams were shattered, hopes were crushed, and everyone wore a smile to hide the despair within. Good times.",
+            "Beware the old well beyond the village outskirts. Legends speak of a mystical creature dwelling within its depths.",
+            "Ah, to be young again! Treasure your days, for they pass like the fleeting wind.",
+          ],
         })
       );
     } else if (symbol === 1031) {
       characters.push(
-        new Sprite({
+        new Character({
           position: {
             x: j * Boundry.width + offset.x,
             y: i * Boundry.height + offset.y,
@@ -93,6 +98,12 @@ charactersMap.forEach((row, i) => {
           },
           scale: 3,
           animate: true,
+          dialogue: [
+            "...",
+            "Hey mister, have you seen my Mischiefur?.",
+            "I think he's hiding in the bushes.",
+            "Can you help me find him?",
+          ],
         })
       );
     }
@@ -190,8 +201,6 @@ const renderables = [
   player,
   foreground,
 ];
-
-
 
 const battle = {
   initiated: false,
@@ -384,7 +393,7 @@ function animate() {
       player,
       characterOffset: {
         x: -3,
-        y: -30,
+        y: 0,
       },
     });
 
@@ -414,11 +423,42 @@ function animate() {
   }
 }
 
-animate();
+//animate();
 
 let lastKey = "";
-window.addEventListener("keydown", (event) => {
-  switch (event.key) {
+window.addEventListener("keydown", (e) => {
+  if (player.isInteracting) {
+    switch (e.key) {
+      case " ":
+        player.interactionAsset.dialogueIndex++;
+
+        const { dialogueIndex, dialogue } = player.interactionAsset;
+        if (dialogueIndex <= dialogue.length - 1) {
+          document.querySelector("#characterDialogueBox").innerHTML =
+            player.interactionAsset.dialogue[dialogueIndex];
+          return;
+        }
+
+        // finish conversation
+        player.isInteracting = false;
+        player.interactionAsset.dialogueIndex = 0;
+        document.querySelector("#characterDialogueBox").style.display = "none";
+
+        break;
+    }
+    return;
+  }
+
+  switch (e.key) {
+    case " ":
+      if (!player.interactionAsset) return;
+
+      // beginning the conversation
+      const firstMessage = player.interactionAsset.dialogue[0];
+      document.querySelector("#characterDialogueBox").innerHTML = firstMessage;
+      document.querySelector("#characterDialogueBox").style.display = "flex";
+      player.isInteracting = true;
+      break;
     case "w":
       keys.w.pressed = true;
       lastKey = "w";
@@ -427,10 +467,12 @@ window.addEventListener("keydown", (event) => {
       keys.a.pressed = true;
       lastKey = "a";
       break;
+
     case "s":
       keys.s.pressed = true;
       lastKey = "s";
       break;
+
     case "d":
       keys.d.pressed = true;
       lastKey = "d";
@@ -438,8 +480,8 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
-window.addEventListener("keyup", (event) => {
-  switch (event.key) {
+window.addEventListener("keyup", (e) => {
+  switch (e.key) {
     case "w":
       keys.w.pressed = false;
       break;
