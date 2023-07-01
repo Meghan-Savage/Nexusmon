@@ -13,6 +13,10 @@ const battleZonesMap = [];
 for (let i = 0; i < battleZonesData.length; i += 70) {
   battleZonesMap.push(battleZonesData.slice(i, 70 + i));
 }
+const charactersMap = [];
+for (let i = 0; i < charactersMapData.length; i += 70) {
+  charactersMap.push(charactersMapData.slice(i, 70 + i));
+}
 
 const boundries = [];
 const offset = {
@@ -47,6 +51,61 @@ battleZonesMap.forEach((row, i) => {
           },
         })
       );
+  });
+});
+
+const characters = [];
+const villagerImg = new Image();
+villagerImg.src = "./img/villager/Idle.png";
+
+const kidImg = new Image();
+kidImg.src = "./img/kid/Idle.png";
+
+charactersMap.forEach((row, i) => {
+  row.forEach((symbol, j) => {
+    if (symbol === 1026) {
+      characters.push(
+        new Sprite({
+          position: {
+            x: j * Boundry.width + offset.x,
+            y: i * Boundry.height + offset.y,
+          },
+          image: villagerImg,
+          frames: {
+            max: 4,
+            hold: 60,
+          },
+          scale: 3,
+          animate: false,
+        })
+      );
+    } else if (symbol === 1031) {
+      characters.push(
+        new Sprite({
+          position: {
+            x: j * Boundry.width + offset.x,
+            y: i * Boundry.height + offset.y,
+          },
+          image: kidImg,
+          frames: {
+            max: 4,
+            hold: 260,
+          },
+          scale: 3,
+          animate: true,
+        })
+      );
+    }
+    if (symbol !== 0) {
+      boundries.push(
+        new Boundry({
+          position: {
+            x: j * Boundry.width + offset.x,
+            y: i * Boundry.height + offset.y,
+          },
+        })
+      );
+    }
   });
 });
 
@@ -116,31 +175,34 @@ const keys = {
   },
 };
 
-const moveables = [background, ...boundries, foreground, ...battleZones];
+const moveables = [
+  background,
+  ...boundries,
+  foreground,
+  ...battleZones,
+  ...characters,
+];
+const renderables = [
+  background,
+  ...boundries,
+  ...battleZones,
+  ...characters,
+  player,
+  foreground,
+];
 
-function rectangularCollision({ rectangle1, rectangle2 }) {
-  return (
-    rectangle1.position.x + rectangle1.width >= rectangle2.position.x &&
-    rectangle1.position.x <= rectangle2.position.x + rectangle2.width &&
-    rectangle1.position.y <= rectangle2.position.y + rectangle2.height &&
-    rectangle1.position.y + rectangle1.height >= rectangle2.position.y
-  );
-}
+
+
 const battle = {
   initiated: false,
 };
 
 function animate() {
   const animationId = window.requestAnimationFrame(animate);
-  background.draw();
-  boundries.forEach((boundry) => {
-    boundry.draw();
+
+  renderables.forEach((renderable) => {
+    renderable.draw();
   });
-  battleZones.forEach((battleZone) => {
-    battleZone.draw();
-  });
-  player.draw();
-  foreground.draw();
 
   let moving = true;
   player.animate = false;
@@ -210,6 +272,16 @@ function animate() {
     player.animate = true;
     player.image = player.sprites.up;
 
+    //monitor for collision
+    checkForCharacterCollision({
+      characters,
+      player,
+      characterOffset: {
+        x: 0,
+        y: 3,
+      },
+    });
+
     for (let i = 0; i < boundries.length; i++) {
       const boundry = boundries[i];
       if (
@@ -236,6 +308,16 @@ function animate() {
   } else if (keys.a.pressed && lastKey === "a") {
     player.animate = true;
     player.image = player.sprites.left;
+
+    checkForCharacterCollision({
+      characters,
+      player,
+      characterOffset: {
+        x: 3,
+        y: 0,
+      },
+    });
+
     for (let i = 0; i < boundries.length; i++) {
       const boundry = boundries[i];
       if (
@@ -262,6 +344,15 @@ function animate() {
   } else if (keys.s.pressed && lastKey === "s") {
     player.animate = true;
     player.image = player.sprites.down;
+    checkForCharacterCollision({
+      characters,
+      player,
+      characterOffset: {
+        x: 0,
+        y: -3,
+      },
+    });
+
     for (let i = 0; i < boundries.length; i++) {
       const boundry = boundries[i];
       if (
@@ -288,6 +379,15 @@ function animate() {
   } else if (keys.d.pressed && lastKey === "d") {
     player.animate = true;
     player.image = player.sprites.right;
+    checkForCharacterCollision({
+      characters,
+      player,
+      characterOffset: {
+        x: -3,
+        y: -30,
+      },
+    });
+
     for (let i = 0; i < boundries.length; i++) {
       const boundry = boundries[i];
       if (

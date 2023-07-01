@@ -7,10 +7,8 @@ const battleBackground = new Sprite({
   },
   image: battleBackgroundImage,
 });
-
 let draggie;
 let emby;
-let tenty;
 let renderedSprites;
 let battleAnimationId;
 let queue;
@@ -121,8 +119,8 @@ function animateBattle() {
 }
 
 animate();
-// initBattle();
-// animateBattle();
+//initBattle();
+//animateBattle();
 
 //attack buttons
 
