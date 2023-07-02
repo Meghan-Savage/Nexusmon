@@ -3,6 +3,7 @@ const audio = {
     src: "./audio/riverTown.wav",
     html5: true,
     volume: 0.1,
+    loop: true,
   }),
   initBattle: new Howl({
     src: "./audio/initBattle.wav",

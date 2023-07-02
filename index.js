@@ -20,8 +20,8 @@ for (let i = 0; i < charactersMapData.length; i += 70) {
 
 const boundries = [];
 const offset = {
-  x: -305,
-  y: -760,
+  x: -1055,
+  y: -900,
 };
 
 //for each can be replaced with map()
